@@ -16,4 +16,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::resource('tasks', TaskController::class);
 
-
+Route::put('tasks/{task}/toggle-complete', [TaskController::class, 'toogleComplete'])->name('tasks.toggle-complete');

@@ -17,4 +17,13 @@ class Task extends Model
         'long_description',
         'completed'
     ];
+
+    /**
+     * Toggle the 'completed' field of a Task.
+     */
+    public function toggleComplete()
+    {
+        $this->completed = !$this->completed;
+        $this->save();
+    }
 }
