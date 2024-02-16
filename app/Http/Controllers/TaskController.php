@@ -14,7 +14,7 @@ class TaskController extends Controller
     public function index()
     {
         $tasks = Task::latest()
-            ->get();
+            ->paginate(10);
 
         return view(
             'tasks.index',
@@ -147,6 +147,30 @@ class TaskController extends Controller
                     'tasks.show',
                     ['task' => $task->id]
                 )
+                ->with(
+                    'error',
+                    env('APP_DEBUG') ? $th->getMessage() : 'An error ocurred!'
+                );
+        }
+    }
+
+    /**
+     * Update the completion status of a task.
+     */
+    public function toogleComplete(Task $task)
+    {
+        try {
+            $task->toggleComplete();
+
+            return redirect()
+                ->back()
+                ->with(
+                    'success',
+                    'Task updated successfully!'
+                );
+        } catch (\Throwable $th) {
+            return redirect()
+                ->back()
                 ->with(
                     'error',
                     env('APP_DEBUG') ? $th->getMessage() : 'An error ocurred!'

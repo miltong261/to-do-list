@@ -1,5 +1,7 @@
 @section('title', isset($task) ? 'Edit Task' : 'Add Task')
 
+<a href="{{ route('tasks.index') }}">Regresar</a>
+
 <form method="POST" action="{{ isset($task) ? route('tasks.update', ['task' => $task->id]) : route('tasks.store') }}">
     @csrf
 
