@@ -13,7 +13,12 @@ use Illuminate\Http\Request;
 class TaskController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Retrieves all records from the Task model.
+     *
+     * This method retrieves all records from the Task model. If records are found, a JSON response
+     * with the records is returned. In case of an error during retrieval, a 500 response is returned.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the retrieval operation.
      */
     public function index()
     {
@@ -35,7 +40,13 @@ class TaskController extends Controller
     }
 
     /**
-     * Display a listing of the deleted resources.
+     * Retrieves all soft-deleted records that were deleted within the current day.
+     *
+     * This method retrieves all soft-deleted records from the Task model that were deleted within
+     * the current day. If records are found, a JSON response with the records is returned.
+     * In case of an error during retrieval, a 500 response is returned.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the retrieval operation.
      */
     public function showDeletedRecords()
     {
@@ -62,7 +73,15 @@ class TaskController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Creates a new record with the provided data.
+     *
+     * This method attempts to create a new record using the data provided in the request.
+     * The request data is validated by the TaskPostRequest class. If the record is created
+     * successfully, a JSON response with the created record is returned with a 201 status code.
+     * In case of an error during creation, a 500 response is returned.
+     *
+     * @param \App\Http\Requests\TaskPostRequest $request The request object containing validated data for creating the record.
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the creation operation.
      */
     public function store(TaskPostRequest $request)
     {
@@ -87,7 +106,14 @@ class TaskController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Retrieves a record by its ID.
+     *
+     * This method attempts to find a record by its ID. If the record is found, a JSON response
+     * with the record data is returned. If the record is not found, a 404 response is returned.
+     * In case of an error during retrieval, a 500 response is returned.
+     *
+     * @param string $id The ID of the record to retrieve.
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
      */
     public function show(string $id)
     {
@@ -115,7 +141,14 @@ class TaskController extends Controller
     }
 
     /**
-     * Display the specified deleted resource.
+     * Retrieves a soft-deleted record by its ID if it was deleted within the current day.
+     *
+     * This method attempts to find a soft-deleted record by its ID that was deleted within the current day.
+     * If the record is not found, a 404 response is returned. If the record is found, a JSON response
+     * with the record data is returned. In case of an error during the retrieval, a 500 response is returned.
+     *
+     * @param string $id The ID of the soft-deleted record to retrieve.
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
      */
     public function showDeletedRecord(string $id)
     {
@@ -123,7 +156,7 @@ class TaskController extends Controller
         $endOfDay = Carbon::now()->endOfDay();
 
         try {
-            $records = Task::onlyTrashed()
+            $record = Task::onlyTrashed()
                 ->where('id', $id)
                 ->whereBetween('deleted_at', [$startOfDay, $endOfDay])
                 ->firstOrFail();
@@ -131,7 +164,7 @@ class TaskController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Record',
-                'data' => $records
+                'data' => $record
             ], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json([
@@ -149,7 +182,16 @@ class TaskController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Updates a record by its ID with the provided data.
+     *
+     * This method attempts to find a record by its ID and update it with the data provided in the
+     * request. The request data is validated by the TaskUpdateRequest class. If the record is not found,
+     * a 404 response is returned. If the update is successful, a JSON response with the updated record
+     * is returned. In case of an error during the update, a 500 response is returned.
+     *
+     * @param \App\Http\Requests\TaskUpdateRequest $request The request object containing validated data.
+     * @param string $id The ID of the record to be updated.
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
      */
     public function update(TaskUpdateRequest $request, string $id)
     {
@@ -182,7 +224,14 @@ class TaskController extends Controller
     }
 
     /**
-     * Change status the specified resource from storage.
+     * Toggles the status of a record by its ID.
+     *
+     * This method attempts to find a record by its ID and toggles its status (e.g., from true to false or vice versa).
+     * If the record is not found, a 404 response is returned. If the status update is successful, a JSON response
+     * with the updated record is returned. In case of an error during the update, a 500 response is returned.
+     *
+     * @param string $id The ID of the record whose status is to be toggled.
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
      */
     public function changeStatus(string $id)
     {
@@ -214,7 +263,14 @@ class TaskController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft deletes all records in the Task model.
+     *
+     * This method retrieves all records from the Task model and soft deletes them.
+     * If no records are found, a 404 response is returned. If the deletion is successful,
+     * a 204 No Content response is returned. In case of an error during deletion, a 500 response
+     * is returned.
+     *
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse Response indicating the result of the operation.
      */
     public function destroy()
     {
@@ -242,7 +298,15 @@ class TaskController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Soft deletes a record by its ID.
+     *
+     * This method attempts to find a record by its ID and soft delete it. If the record
+     * is not found, a 404 response is returned. If the deletion is successful, a 204
+     * No Content response is returned. In case of an error during deletion, a 500 response
+     * is returned.
+     *
+     * @param string $id The ID of the record to be deleted.
+     * @return \Illuminate\Http\Response|\Illuminate\Http\JsonResponse Response indicating the result of the operation.
      */
     public function destroyById(string $id)
     {
@@ -268,7 +332,13 @@ class TaskController extends Controller
     }
 
     /**
-     * Restore all resources from storage.
+     * Restores all soft-deleted records within the current day.
+     *
+     * This method retrieves all records that were soft-deleted within the current day
+     * and restores them. If no records are found, a 404 response is returned. In case
+     * of an error during restoration, a 500 response is returned.
+     *
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
      */
     public function restore()
     {
@@ -305,7 +375,15 @@ class TaskController extends Controller
     }
 
     /**
-     * Change status the specified deleted resource from storage.
+     * Restores a soft-deleted record by its ID.
+     *
+     * This method attempts to find a soft-deleted record by its ID and restore it. If the record
+     * is not found, a 404 response is returned. If the restoration is successful, a JSON response
+     * with the restored record is returned. In case of an error during restoration, a 500 response
+     * is returned.
+     *
+     * @param string $id The ID of the record to be restored.
+     * @return \Illuminate\Http\JsonResponse JSON response with the result of the operation.
      */
     public function restoreById(string $id)
     {
